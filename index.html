@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Universo Azul de Marianela 💙</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,600&family=Montserrat:wght@200;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #01040f;
+            font-family: 'Montserrat', sans-serif;
+            color: #e0f2fe;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: grab;
+        }
+
+        #canvas-container:active {
+            cursor: grabbing;
+        }
+
+        #intro-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, #0a2352 0%, #020817 65%, #01030a 100%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            transition: opacity 1.2s ease, visibility 1.2s ease;
+        }
+
+        #intro-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .intro-title {
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: clamp(2.1rem, 5.2vw, 4rem);
+            background: linear-gradient(135deg, #ffffff 0%, #bae6fd 35%, #38bdf8 70%, #818cf8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 18px;
+            filter: drop-shadow(0 0 25px rgba(56, 189, 248, 0.55));
+        }
+
+        .intro-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: clamp(1.15rem, 2.5vw, 1.55rem);
+            color: #bae6fd;
+            max-width: 540px;
+            margin-bottom: 38px;
+            line-height: 1.6;
+            text-shadow: 0 2px 12px rgba(2, 132, 199, 0.4);
+        }
+
+        .enter-btn {
+            padding: 15px 40px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #f0f9ff;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(59, 130, 246, 0.15));
+            border: 1px solid rgba(125, 211, 252, 0.65);
+            border-radius: 50px;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            transition: all 0.4s ease;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.35), inset 0 0 15px rgba(186, 230, 253, 0.2);
+        }
+
+        .enter-btn:hover {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.45), rgba(37, 99, 235, 0.35));
+            border-color: #ffffff;
+            transform: scale(1.06);
+            box-shadow: 0 0 45px rgba(56, 189, 248, 0.75);
+        }
+
+        #ui-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 28px 36px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .dedication-badge {
+            pointer-events: auto;
+        }
+
+        .dedication-badge h1 {
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: clamp(1.35rem, 3vw, 2.1rem);
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #ffffff, #7dd3fc, #38bdf8, #93c5fd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.4));
+        }
+
+        .dedication-badge p {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            color: rgba(186, 230, 253, 0.85);
+            margin-top: 4px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            pointer-events: auto;
+            flex-wrap: wrap;
+        }
+
+        .glass-btn {
+            background: rgba(7, 22, 54, 0.65);
+            border: 1px solid rgba(125, 211, 252, 0.42);
+            color: #e0f2fe;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.22);
+        }
+
+        .glass-btn:hover {
+            background: rgba(14, 165, 233, 0.35);
+            border-color: #7dd3fc;
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+        }
+
+        .bottom-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+        }
+
+        #love-quote {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: clamp(1.25rem, 2.8vw, 1.8rem);
+            color: #f0f9ff;
+            text-shadow: 0 0 22px rgba(56, 189, 248, 0.9), 0 2px 10px rgba(1, 6, 20, 0.95);
+            max-width: 780px;
+            min-height: 2.2em;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        #love-quote.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hint {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(186, 230, 253, 0.58);
+        }
+
+        .floating-star-card {
+            position: fixed;
+            pointer-events: none;
+            z-index: 25;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, rgba(6, 24, 62, 0.88), rgba(14, 48, 108, 0.82));
+            border: 1px solid rgba(125, 211, 252, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 16px 26px;
+            border-radius: 26px;
+            box-shadow:
+                0 10px 35px rgba(2, 132, 199, 0.45),
+                0 0 20px rgba(56, 189, 248, 0.35),
+                inset 0 0 18px rgba(186, 230, 253, 0.2);
+            text-align: center;
+            max-width: min(88vw, 460px);
+            animation: floatCardRead 7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .floating-star-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 18%;
+            right: 18%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bae6fd, #ffffff, #bae6fd, transparent);
+            border-radius: 50%;
+        }
+
+        .floating-star-card .deco-top {
+            font-size: 1.2rem;
+            letter-spacing: 8px;
+            margin-bottom: 6px;
+            display: block;
+            filter: drop-shadow(0 0 8px rgba(125, 211, 252, 0.85));
+        }
+
+        .floating-star-card .msg-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-weight: 600;
+            font-size: clamp(1.2rem, 2.6vw, 1.52rem);
+            line-height: 1.4;
+            color: #ffffff;
+            text-shadow: 0 0 14px rgba(56, 189, 248, 0.85), 0 1px 4px rgba(0, 0, 0, 0.65);
+        }
+
+        .floating-star-card .deco-bottom {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #7dd3fc;
+            margin-top: 8px;
+            opacity: 0.88;
+            display: block;
+        }
+
+        @keyframes floatCardRead {
+            0% { opacity: 0; transform: translate(-50%, -15%) scale(0.75); }
+            9% { opacity: 1; transform: translate(-50%, -50%) scale(1.03); }
+            16% { transform: translate(-50%, -52%) scale(1); }
+            84% { opacity: 1; transform: translate(-50%, -74%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -98%) scale(0.95); }
+        }
+
+        .burst-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 24;
+            font-size: 1.45rem;
+            transform: translate(-50%, -50%);
+            animation: burstFly var(--dur, 3s) cubic-bezier(0.15, 0.85, 0.35, 1) forwards;
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.9));
+        }
+
+        @keyframes burstFly {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(0deg); }
+            15% { opacity: 1; }
+            75% { opacity: 0.95; }
+            100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.3) rotate(var(--rot)); }
+        }
+
+        @media (max-width: 600px) {
+            #ui-layer { padding: 18px 20px; }
+            .top-bar { flex-direction: column; gap: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="intro-overlay">
+        <h1 class="intro-title">Para Marianela</h1>
+        <p class="intro-subtitle">
+            "Aunque la distancia nos separe hoy, mi corazón camina contigo a cada paso."
+        </p>
+        <button class="enter-btn" id="start-btn">Explorar Tu Universo 💙</button>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <div class="top-bar">
+            <div class="dedication-badge">
+                <h1>Galaxia Marianela</h1>
+                <p>Siempre contigo, aun a la distancia</p>
+            </div>
+            <div class="controls">
+                <button class="glass-btn" id="shooting-star-btn">🌠 Lluvia de deseos</button>
+                <button class="glass-btn" id="music-btn">🎵 Música: Off</button>
+            </div>
+        </div>
+
+        <div class="bottom-bar">
+            <div id="love-quote" class="visible">"Aunque haya kilómetros entre nosotros, nunca estás sola: aquí estoy contigo."</div>
+            <div class="hint">Toca la pantalla para recibir palabras de ánimo, amor, flores y estrellas</div>
+        </div>
+    </div>
+
+    <audio id="bg-music" preload="auto" loop playsinline></audio>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // Más de 320 frases de amor, compañía a la distancia y ánimo para Marianela
+        const loveMessages = [
+            // Amor y ternura hacia Marianela
+            "Eres mi estrella azul más brillante, Marianela 💙",
+            "Mi universo entero empieza en tu sonrisa",
+            "Te amo más allá de donde termina el cielo",
+            "Contigo cada día se siente como pura magia",
+            "Brillas más que todas las supernovas del cosmos",
+            "Eres mi destino favorito en esta y en mil vidas",
+            "Tu mirada ilumina hasta mi rincón más oscuro",
+            "Eres el sueño bonito del que nunca quiero despertar",
+            "Ni mil galaxias se comparan con tu belleza",
+            "Siempre tú, Marianela, hoy y por toda la vida",
+            "Eres la melodía más hermosa de todo el universo",
+            "Mi corazón orbita alrededor de ti sin descanso",
+            "En cualquier universo te volvería a elegir a ti",
+            "Tu risa es mi sonido favorito en el mundo",
+            "Eres el regalo más hermoso que me dio la vida",
+            "Amarte es lo más fácil y sincero que he hecho",
+            "Cuando pienso en ti, el tiempo entero se detiene",
+            "Eres mi hogar, sin importar en qué lugar esté",
+            "Cada latido de mi corazón pronuncia tu nombre",
+            "Gracias por existir y llenar mis días de luz",
+            "Si tuviera que volver a empezar, te buscaría otra vez",
+            "Tienes una luz que transforma todo lo que toca",
+            "Amar a distancia contigo me enseña que lo verdadero no se apaga",
+            "Tu nombre es lo más bonito que tengo en la mente",
+            "Eres mi paz en medio del ruido de cada día",
+            "No hay cielo tan inmenso como lo que siento por ti",
+            "Me enamoro de tu forma de ser una y otra vez",
+            "Eres la casualidad más bonita que me pasó",
+            "Cada detalle tuyo hace que te quiera aún más",
+            "Mi lugar favorito siempre será estar cerca de ti",
+            "Eres dulce, valiente y única, Marianela",
+            "Cuidarte y quererte es de lo mejor que hago cada día",
+            "Aun lejos, eres lo más cercano a mi corazón",
+            "Tu voz y tu recuerdo me acompañan a todas partes",
+            "Eres la estrella que guía mis mejores deseos",
+            "No existe distancia capaz de enfriar este cariño",
+            "Me haces bien con solo existir en mi vida",
+            "Eres el capítulo más bonito de mi historia",
+            "Todo se ve más claro cuando pienso en un futuro contigo",
+            "Eres mi pensamiento favorito al despertar y al dormir",
+
+            // Para que nunca se sienta sola a la distancia
+            "Nunca estás sola, Marianela: mi corazón camina contigo",
+            "La distancia solo separa cuerpos, jamás dos almas unidas",
+            "Aunque hoy no esté a tu lado, estoy contigo en cada paso",
+            "Cierra los ojos un segundo y siente mi abrazo a la distancia",
+            "No tienes que cargarlo todo sola; aquí estoy para ti",
+            "Aun a kilómetros de distancia, te acompaño en silencio y con cariño",
+            "Si el día se siente pesado, recuerda que no estás sola",
+            "Estoy aquí contigo, hoy, mañana y en cada momento",
+            "Los kilómetros no pueden borrar lo cerca que te siento",
+            "Cada vez que mires el cielo azul o estrellado, acuérdate que pienso en ti",
+            "No estás sola en tus días buenos ni en los difíciles",
+            "Mi cariño viaja contigo a donde vayas, Marianela",
+            "Aunque nos separe la distancia, nuestro vínculo es más fuerte",
+            "Siente mi apoyo a la distancia, como un abrigo cálido",
+            "Siempre tienes un lugar seguro en mi corazón",
+            "No estás sola: cuentas conmigo para escucharte y acompañarte",
+            "Aun lejos, celebro cada paso tuyo como si estuviera ahí",
+            "Si hoy te sientes cansada o sola, respira: estoy contigo",
+            "La distancia es solo temporal; lo que sentimos es real",
+            "Nunca caminas sola mientras yo esté a tu lado",
+            "Te mando un abrazo enorme que cruza cualquier distancia",
+            "Aunque no nos veamos hoy, te llevo conmigo todo el día",
+            "Estoy a un mensaje o a un pensamiento de distancia de ti",
+            "No importa cuántos kilómetros haya, te tengo muy presente",
+            "Cuando extrañes, recuerda que yo también te pienso y te quiero",
+            "Tu soledad no existe cuando sabes cuánto te quiero",
+            "Aun separados por la distancia, compartimos el mismo cielo",
+            "Estoy contigo en cada mañana, cada tarde y cada noche",
+            "Nunca dudes de lo presente que estás en mi vida",
+            "Aunque hoy estemos lejos, estamos construyendo nuestro reencuentro",
+            "Te acompaño con todo mi cariño en cada etapa que vives",
+            "No estás sola, Marianela; tienes a alguien que te quiere de verdad",
+            "Cada día que pasa es un día menos para volver a vernos",
+            "Mi cariño por ti no conoce fronteras ni distancias",
+            "Aun a lo lejos, estoy de tu mano en todo lo que enfrentas",
+
+            // Ánimo, fuerza y seguir adelante con todo
+            "¡Tú puedes con esto, Marianela! Creo en ti con los ojos cerrados",
+            "Eres mucho más fuerte de lo que a veces crees sentir",
+            "Respira profundo, Marianela: todo va a estar bien 💙",
+            "Cada meta que te propongas está más cerca de lo que imaginas",
+            "Sigue adelante con confianza, que tienes todo para lograrlo",
+            "No te rindas: las cosas bonitas también toman su tiempo",
+            "Hoy es un buen día para recordar lo valiente que eres",
+            "Aunque hoy cueste un poco, vas a salir adelante brillando",
+            "Tienes una fuerza interior increíble, Marianela",
+            "Un paso a la vez también es avanzar; no te presiones tanto",
+            "Estoy muy orgulloso de ti y de todo lo que intentas",
+            "Cree en tu capacidad tanto como yo creo en ti",
+            "Cada tropiezo es solo un impulso para llegar más alto",
+            "Vas a lograr lo que te propongas, paso firme y corazón sereno",
+            "No dejes que un mal momento apague tu luz",
+            "Sigue avanzando, Marianela, que el esfuerzo siempre deja huella",
+            "Tienes todo lo necesario para superar este momento",
+            "Confía en tu proceso: estás creciendo y avanzando",
+            "Si hoy necesitas descansar, hazlo sin culpa y sigue mañana",
+            "Tu valentía me inspira todos los días, Marianela",
+            "Cada día nuevo trae una oportunidad de sentirte mejor",
+            "No subestimes lo lejos que ya has llegado",
+            "Adelante, preciosa, que yo te animo desde aquí con todo el corazón",
+            "Las tormentas pasan y siempre vuelve la calma y la luz",
+            "Eres capaz de cosas maravillosas; no lo olvides jamás",
+            "Sigue creyendo en tus sueños, porque valen mucho",
+            "Hoy te mando fuerzas, calma y muchas ganas de seguir",
+            "Aunque el camino a veces duela, no estás sola para recorrerlo",
+            "Tu esfuerzo de hoy es la base de tus logros de mañana",
+            "Ánimo, Marianela: aquí tienes a alguien que siempre te respalda",
+
+            // Palabras bonitas, dulces y motivadoras adicionales
+            "Eres luz, ternura y fortaleza en una misma persona",
+            "Que nunca te falte una razón para sonreír hoy",
+            "Tu corazón vale oro, Marianela",
+            "Me encanta ver cómo luchas por lo que quieres",
+            "Eres ese rayo de sol que alegra cualquier día gris",
+            "Gracias por ser tan especial y tan tú",
+            "Hoy te quiero más que ayer y mañana todavía más",
+            "Que cada estrella de esta galaxia te recuerde cuánto vales",
+            "Eres única, irrepetible y profundamente amada",
+            "Si hoy el día pesa, deja que este espacio te dé un respiro",
+            "Sigue brillando a tu propio ritmo, Marianela",
+            "Eres mi calma, mi alegría y mi motor",
+            "No hay reto imposible para un corazón tan bonito como el tuyo",
+            "Te pienso con cariño en los momentos más simples del día",
+            "Que la paz te acompañe hoy y siempre",
+            "Eres el motivo de muchas de mis mejores sonrisas",
+            "Aun lejos, me importas muchísimo, Marianela",
+            "Sigue adelante con la frente en alto y el corazón lleno de fe",
+            "Eres una persona increíble y mereces todo lo bueno",
+            "Cada palabra aquí está escrita pensando en ti, Marianela",
+            "Hoy, mañana y siempre: cuentas conmigo",
+            "Tu sonrisa tiene el poder de cambiarlo todo",
+            "No te detengas; lo mejor está por llegar",
+            "Eres mi estrella favorita en todo el firmamento",
+            "Te abrazo con el alma entera a pesar de la distancia"
+        ];
+
+        // Palabras y frases cortas de amor, ánimo y compañía para superar las 300 entradas con variedad
+        const extraPhrases = [
+            "Te quiero, Marianela 💙", "No estás sola 💙", "¡Tú puedes! ✨", "Siempre contigo 🌸",
+            "Brillas mucho ⭐", "Aun lejos, te pienso 🩵", "Paso a paso, ánimo 🦋", "Eres mi luz 🌟",
+            "Te abrazo a la distancia 💙", "Cree en ti ✨", "Eres muy fuerte 💪", "Mi estrella azul 🌠",
+            "Todo va a estar bien 🩵", "Te amo mucho 💙", "Adelante, preciosa 🌸", "Nunca estás sola 💫",
+            "Eres única ✨", "Cuentas conmigo 💙", "Sigue brillando ⭐", "Mi corazón es tuyo 🩵",
+            "Con calma y fuerza 🌸", "Te llevo conmigo 🦋", "Eres increíble 🌟", "Un día a la vez 💙",
+            "Hoy te animo yo ✨", "Eres mi hogar 🩵", "Fuerza, Marianela 💪", "Amor a la distancia 💙",
+            "Eres pura magia ✨", "A tu lado siempre 🦋", "Lo vas a lograr 🌟", "Eres mi alegría 🩵",
+            "No te rindas nunca 🌸", "Te pienso siempre 💙", "Luz en tu camino ✨", "Juntos a pesar de todo 🩵",
+            "Eres valiente ⭐", "Mi cielo azul 🌠", "Siempre te apoyo 💙", "Sonríe, hoy te quiero 🌸",
+            "Eres mi paz 🩵", "Paso firme, ánimo ✨", "Te adoro, Marianela 💙", "Aun lejos, presente 🦋",
+            "Eres mi sueño bonito 🌟", "Confía en ti misma ✨", "Cariño sin distancia 💙", "Eres especial 🩵",
+            "Ánimo, todo pasa 🌸", "Mi destino eres tú 💙", "Fuerza y calma ✨", "Siempre en mi mente 🩵",
+            "Eres mi estrella ✨", "Te cuido a la distancia 💙", "Vas a salir adelante 🌟", "Eres mi sol azul 🩵",
+            "No estás sola hoy 🌸", "Te quiero un mundo 💙", "Sigue adelante ✨", "Mi abrazo para ti 🦋",
+            "Eres extraordinaria ⭐", "A tu favor siempre 💙", "Calma en el corazón 🩵", "Eres mi inspiración 🌟",
+            "Hoy creo más en ti ✨", "Siempre cerca en espíritu 💙", "Eres dulce y fuerte 🌸", "Mi universo azul 🌠",
+            "Animo, hermosa 🩵", "Te quiero de verdad 💙", "Cada día más cerca ✨", "Eres mi tesoro 🌟",
+            "No te presiones, avanza 🌸", "Mi cariño es tuyo 💙", "Brilla sin miedo ✨", "Siempre de tu mano 🩵",
+            "Eres mi mejor deseo ⭐", "Aun lejos, te quiero 💙", "Fuerza en tu día 🌸", "Eres luz pura ✨",
+            "Nunca te suelto 💙", "Sigue soñando alto 🌟", "Mi corazón contigo 🩵", "Eres mi calma azul 🌠",
+            "Ánimo con todo 💪", "Te quiero hoy y siempre 💙", "Eres un regalo ✨", "A la distancia, contigo 🌸",
+            "Cree en tu luz ⭐", "Eres mi vida 💙", "Un abrazo enorme 🩵", "Vas a poder con todo ✨",
+            "Mi pensamiento bonito 💙", "Siempre te respaldo 🌸", "Eres única en el mundo 🌟", "Ánimo, corazón 🩵",
+            "Te quiero sin medida 💙", "Sigue adelante con fe ✨", "Mi estrella guía 🌠", "No estás sola jamás 🌸",
+            "Eres mi dicha 🩵", "Fuerza, Marianela 💙", "Brillas en la distancia ✨", "Siempre te quiero ⭐",
+            "Hoy es un buen paso 🌸", "Mi amor por ti es real 💙", "Eres valiosa 🩵", "Adelante sin dudar ✨",
+            "Aun lejos, te acompaño 💙", "Eres mi paz interior 🌟", "Ánimo y sonrisa 🌸", "Te quiero muchísimo 🩵",
+            "Cada día cuenta ✨", "Mi corazón te abraza 💙", "Eres increíble tal como eres ⭐", "No estás sola, estoy aquí 🌸",
+            "Fuerza y esperanza 🩵", "Te amo a la distancia 💙", "Sigue brillando, Marianela ✨", "Mi lugar favorito eres tú 🌟",
+            "Con todo mi cariño 💙", "Ánimo, vas bien 🌸", "Eres mi luz azul 🌠", "Siempre contigo, hoy y mañana 🩵",
+            "Cree en lo que vales ✨", "Te quiero en cada instante 💙", "Aun lejos, somos equipo 🦋", "Eres fuerza y ternura 🌸",
+            "Mi abrazo cruza kilómetros 💙", "No te rindas, aquí estoy ✨", "Eres mi estrella más linda ⭐", "Ánimo, todo mejora 🩵",
+            "Te quiero con el alma 💙", "Sigue adelante, hermosa 🌸", "Mi cariño no descansa ✨", "Nunca sola, siempre amada 🩵",
+            "Eres mi mejor historia 💙", "Fuerza en cada paso 🌟", "Te pienso con ternura 🌸", "Aun lejos, te cuido 💙",
+            "Brilla hoy, Marianela ✨", "Mi corazón late por ti 🩵", "Ánimo, lo lograrás ⭐", "Te quiero más de lo que imaginas 💙",
+            "Siempre a tu lado 🌸", "Eres luz en la distancia 🌠", "Confía, todo llega ✨", "Mi abrazo sincero para ti 🩵",
+            "Eres mi dulce compañía 💙", "Sigue firme, preciosa 🌸", "Te quiero hoy más que ayer ✨", "No estás sola en el camino 🩵",
+            "Fuerza y alegría ⭐", "Aun lejos, te tengo presente 💙", "Eres mi estrella azul ✨", "Ánimo, sigue adelante 🌸",
+            "Te quiero para siempre 💙", "Mi apoyo incondicional 🩵", "Brillas con luz propia 🌟", "Siempre contigo, Marianela ✨",
+            "Un abrazo a la distancia 🌸", "Cree en tu fuerza 💙", "Eres mi motivo bonito ✨", "No estás sola, te quiero 🩵",
+            "Ánimo, cada paso suma ⭐", "Te amo hoy y siempre 💙", "Eres mi calma y mi luz 🌠", "Sigue adelante con confianza 🌸",
+            "Aun lejos, mi corazón es tuyo 💙", "Fuerza, luz de mi vida ✨", "Te quiero sin distancia 🩵", "Siempre creyendo en ti 🌟",
+            "Un respiro y adelante 🌸", "Eres mi estrella favorita 💙", "Brilla siempre, Marianela ✨", "No estás sola, aquí estoy contigo 🩵",
+            "Te quiero con todo mi ser 💙", "Ánimo, todo está a tu favor ⭐", "Mi abrazo lleno de cariño 🌸", "Sigue avanzando con amor ✨",
+            "Aun lejos, te pienso y te quiero 💙", "Eres mi mayor alegría 🩵", "Fuerza en tu camino 🌟", "Siempre contigo en la distancia 🌸",
+            "Te quiero, hoy y cada día 💙", "Eres luz, amor y valentía ✨", "Ánimo, Marianela, tú puedes 🩵", "Mi corazón siempre contigo ⭐",
+            "Aun lejos, jamás estás sola 💙", "Sigue adelante, mi estrella 🌸", "Te amo más allá de la distancia ✨", "Siempre aquí para ti, Marianela 🩵"
+        ];
+
+        const allLoveMessages = [...loveMessages, ...extraPhrases];
+
+        let availableIndices = [];
+        function getNextUniqueMessage() {
+            if (availableIndices.length === 0) {
+                availableIndices = allLoveMessages.map((_, i) => i);
+                for (let i = availableIndices.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [availableIndices[i], availableIndices[j]] = [availableIndices[j], availableIndices[i]];
+                }
+            }
+            return allLoveMessages[availableIndices.pop()];
+        }
+
+        let sfxCtx = null;
+        let tapChimeStep = 0;
+        const tapChimeScale = [523.25, 587.33, 659.25, 783.99, 880.00, 987.77, 1046.50, 783.99];
+
+        function playLovelyTapSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                if (!sfxCtx) sfxCtx = new AudioCtx();
+                if (sfxCtx.state === 'suspended') sfxCtx.resume();
+
+                const now = sfxCtx.currentTime;
+                const baseFreq = tapChimeScale[tapChimeStep % tapChimeScale.length];
+                tapChimeStep++;
+
+                [1, 1.5].forEach((mult, idx) => {
+                    const osc = sfxCtx.createOscillator();
+                    const gain = sfxCtx.createGain();
+                    osc.type = idx === 0 ? 'sine' : 'triangle';
+                    osc.frequency.setValueAtTime(baseFreq * mult, now + idx * 0.045);
+
+                    const peak = idx === 0 ? 0.055 : 0.02;
+                    const dur = idx === 0 ? 1.45 : 0.9;
+
+                    gain.gain.setValueAtTime(0.0001, now + idx * 0.045);
+                    gain.gain.exponentialRampToValueAtTime(peak, now + idx * 0.045 + 0.025);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.045 + dur);
+
+                    osc.connect(gain);
+                    gain.connect(sfxCtx.destination);
+                    osc.start(now + idx * 0.045);
+                    osc.stop(now + idx * 0.045 + dur + 0.03);
+                });
+            } catch (e) {}
+        }
+
+        // Sistema de música con respaldo automático de rutas
+        const bgMusicEl = document.getElementById('bg-music');
+        const musicBtn = document.getElementById('music-btn');
+        const audioCandidates = [
+            'in_the_pool.mp3',
+            './in_the_pool.mp3',
+            'in_the_pool.mp3.mp3',
+            'galaxia-marianela/in_the_pool.mp3'
+        ];
+        let isMusicPlaying = false;
+        let resolvedAudioSrc = '';
+
+        bgMusicEl.volume = 0.65;
+
+        async function resolveAndPlayAudio(forcePlay = false) {
+            if (forcePlay && isMusicPlaying) return;
+
+            if (isMusicPlaying && !forcePlay) {
+                bgMusicEl.pause();
+                isMusicPlaying = false;
+                musicBtn.textContent = '🎵 Música: Off';
+                return;
+            }
+
+            musicBtn.textContent = '🎵 Cargando...';
+
+            if (!resolvedAudioSrc) {
+                for (let i = 0; i < audioCandidates.length; i++) {
+                    const candidate = audioCandidates[i];
+                    try {
+                        const res = await fetch(candidate, { method: 'HEAD', cache: 'no-store' });
+                        const sizeHeader = res.headers.get('content-length');
+                        const sizeBytes = sizeHeader ? parseInt(sizeHeader, 10) : 999999;
+                        if (res.ok && sizeBytes > 1000) {
+                            resolvedAudioSrc = candidate;
+                            break;
+                        }
+                    } catch (e) {
+                        if (window.location.protocol === 'file:' && i === 0) {
+                            resolvedAudioSrc = candidate;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!resolvedAudioSrc) {
+                musicBtn.textContent = '🎵 Falta MP3 (2MB)';
+                return;
+            }
+
+            if (bgMusicEl.getAttribute('src') !== resolvedAudioSrc) {
+                bgMusicEl.src = resolvedAudioSrc;
+                bgMusicEl.load();
+            }
+
+            try {
+                await bgMusicEl.play();
+                isMusicPlaying = true;
+                musicBtn.textContent = '🎵 Música: On';
+            } catch (err) {
+                isMusicPlaying = false;
+                musicBtn.textContent = '🎵 Toca para sonar';
+            }
+        }
+
+        bgMusicEl.addEventListener('error', () => {
+            resolvedAudioSrc = '';
+            isMusicPlaying = false;
+            musicBtn.textContent = '🎵 Falta MP3 (2MB)';
+        });
+
+        const startBtn = document.getElementById('start-btn');
+        const introOverlay = document.getElementById('intro-overlay');
+        const quoteEl = document.getElementById('love-quote');
+
+        startBtn.addEventListener('click', () => {
+            introOverlay.classList.add('hidden');
+            playLovelyTapSound();
+            if (typeof spawnShootingStar === 'function') {
+                spawnShootingStar();
+            }
+            resolveAndPlayAudio(true);
+        });
+
+        const container = document.getElementById('canvas-container');
+        let scene, camera, renderer, controls, galaxyPoints, nebulaGroup, bgStars, coreLight, marianelaSprite;
+        const shootingStars = [];
+
+        function createGlowTexture(innerColor, midColor, outerColor) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+            gradient.addColorStop(0, innerColor);
+            gradient.addColorStop(0.25, midColor);
+            gradient.addColorStop(0.6, outerColor);
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 128, 128);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createNameSprite(text) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = 'bold 94px "Cinzel Decorative", Georgia, serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = '#0284c7';
+            ctx.shadowBlur = 40;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+            ctx.shadowColor = '#7dd3fc';
+            ctx.shadowBlur = 18;
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(11.5, 2.85, 1);
+            sprite.position.set(0, 1.85, 0);
+            return sprite;
+        }
+
+        function spawnShootingStar() {
+            if (!scene) return;
+            const starTex = createGlowTexture('rgba(255,255,255,1)', 'rgba(186,230,253,0.85)', 'rgba(56,189,248,0.2)');
+            const group = new THREE.Group();
+            group.position.set((Math.random() - 0.5) * 38, 10 + Math.random() * 14, (Math.random() - 0.5) * 38);
+
+            const head = new THREE.Sprite(new THREE.SpriteMaterial({
+                map: starTex,
+                color: 0xe0f2fe,
+                blending: THREE.AdditiveBlending,
+                transparent: true
+            }));
+            head.scale.set(1.9, 1.9, 1);
+            group.add(head);
+
+            const trailGeo = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(-5.5, 2.6, -3.6)
+            ]);
+            const trail = new THREE.Line(trailGeo, new THREE.LineBasicMaterial({
+                color: 0x38bdf8,
+                transparent: true,
+                opacity: 0.95
+            }));
+            group.add(trail);
+
+            const velocity = new THREE.Vector3(
+                0.45 + Math.random() * 0.35,
+                -(0.22 + Math.random() * 0.2),
+                0.3 + Math.random() * 0.3
+            );
+            scene.add(group);
+            shootingStars.push({ mesh: group, velocity, life: 1.0 });
+        }
+
+        if (typeof THREE !== 'undefined' && typeof THREE.OrbitControls !== 'undefined') {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x01040f, 0.011);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 14, 26);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxDistance = 60;
+            controls.minDistance = 4;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.45;
+
+            const starTexture = createGlowTexture('rgba(255,255,255,1)', 'rgba(186,230,253,0.85)', 'rgba(56,189,248,0.2)');
+            const nebulaTexture = createGlowTexture('rgba(56,189,248,0.26)', 'rgba(37,99,235,0.12)', 'rgba(10,25,70,0)');
+
+            const count = 35000;
+            const radiusMax = 22;
+            const branches = 5;
+            const spin = 1.35;
+            const galaxyGeo = new THREE.BufferGeometry();
+            const pos = new Float32Array(count * 3);
+            const cols = new Float32Array(count * 3);
+
+            const cCore = new THREE.Color('#ffffff');
+            const cIce = new THREE.Color('#7dd3fc');
+            const cCyan = new THREE.Color('#0ea5e9');
+            const cSapphire = new THREE.Color('#2563eb');
+            const cDeep = new THREE.Color('#1e1b4b');
+
+            for (let i = 0; i < count; i++) {
+                const i3 = i * 3;
+                const r = Math.pow(Math.random(), 1.5) * radiusMax;
+                const spinAngle = r * spin;
+                const branchAngle = ((i % branches) / branches) * Math.PI * 2;
+                const rx = Math.pow(Math.random(), 3.2) * (Math.random() < 0.5 ? 1 : -1) * 0.42 * r;
+                const ry = Math.pow(Math.random(), 3.2) * (Math.random() < 0.5 ? 1 : -1) * 0.42 * (r * 0.45);
+                const rz = Math.pow(Math.random(), 3.2) * (Math.random() < 0.5 ? 1 : -1) * 0.42 * r;
+
+                pos[i3] = Math.cos(branchAngle + spinAngle) * r + rx;
+                pos[i3 + 1] = ry;
+                pos[i3 + 2] = Math.sin(branchAngle + spinAngle) * r + rz;
+
+                const mixed = new THREE.Color();
+                const ratio = r / radiusMax;
+                if (ratio < 0.2) mixed.copy(cCore).lerp(cIce, ratio / 0.2);
+                else if (ratio < 0.48) mixed.copy(cIce).lerp(cCyan, (ratio - 0.2) / 0.28);
+                else if (ratio < 0.78) mixed.copy(cCyan).lerp(cSapphire, (ratio - 0.48) / 0.3);
+                else mixed.copy(cSapphire).lerp(cDeep, (ratio - 0.78) / 0.22);
+
+                if (Math.random() > 0.93) mixed.lerp(new THREE.Color('#ffffff'), 0.8);
+                cols[i3] = mixed.r;
+                cols[i3 + 1] = mixed.g;
+                cols[i3 + 2] = mixed.b;
+            }
+
+            galaxyGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            galaxyGeo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+            galaxyPoints = new THREE.Points(galaxyGeo, new THREE.PointsMaterial({
+                size: 0.24,
+                sizeAttenuation: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+                vertexColors: true,
+                map: starTexture,
+                transparent: true,
+                opacity: 0.96
+            }));
+            scene.add(galaxyPoints);
+
+            coreLight = new THREE.Sprite(new THREE.SpriteMaterial({
+                map: createGlowTexture('rgba(255,255,255,1)', 'rgba(125,211,252,0.75)', 'rgba(29,78,216,0)'),
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                depthWrite: false
+            }));
+            coreLight.scale.set(9.5, 9.5, 1);
+            scene.add(coreLight);
+
+            nebulaGroup = new THREE.Group();
+            const nebulaColors = ['#38bdf8', '#0284c7', '#3b82f6', '#60a5fa', '#22d3ee', '#1d4ed8'];
+            for (let i = 0; i < 45; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 2 + Math.random() * 14.5;
+                const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+                    map: nebulaTexture,
+                    color: new THREE.Color(nebulaColors[i % nebulaColors.length]),
+                    blending: THREE.AdditiveBlending,
+                    transparent: true,
+                    opacity: 0.3,
+                    depthWrite: false
+                }));
+                sprite.position.set(Math.cos(angle) * dist, (Math.random() - 0.5) * 1.6, Math.sin(angle) * dist);
+                const sc = 6.5 + Math.random() * 7;
+                sprite.scale.set(sc, sc, 1);
+                nebulaGroup.add(sprite);
+            }
+            scene.add(nebulaGroup);
+
+            marianelaSprite = createNameSprite('Marianela');
+            scene.add(marianelaSprite);
+
+            const bgGeo = new THREE.BufferGeometry();
+            const bgCount = 4500;
+            const bgPos = new Float32Array(bgCount * 3);
+            const bgCol = new Float32Array(bgCount * 3);
+            for (let i = 0; i < bgCount; i++) {
+                const i3 = i * 3;
+                const r = 60 + Math.random() * 140;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                bgPos[i3] = r * Math.sin(phi) * Math.cos(theta);
+                bgPos[i3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+                bgPos[i3 + 2] = r * Math.cos(phi);
+                const c = new THREE.Color().setHSL(0.54 + Math.random() * 0.12, 0.65, 0.85);
+                bgCol[i3] = c.r; bgCol[i3 + 1] = c.g; bgCol[i3 + 2] = c.b;
+            }
+            bgGeo.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
+            bgGeo.setAttribute('color', new THREE.BufferAttribute(bgCol, 3));
+            bgStars = new THREE.Points(bgGeo, new THREE.PointsMaterial({
+                size: 0.45,
+                map: starTexture,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.88,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            }));
+            scene.add(bgStars);
+
+            const clock = new THREE.Clock();
+            function animate() {
+                requestAnimationFrame(animate);
+                const t = clock.getElapsedTime();
+                galaxyPoints.rotation.y = t * 0.06;
+                nebulaGroup.rotation.y = t * 0.05;
+                bgStars.rotation.y = -t * 0.008;
+                const pulse = 9.0 + Math.sin(t * 2.2) * 1.1;
+                coreLight.scale.set(pulse, pulse, 1);
+                marianelaSprite.position.y = 1.9 + Math.sin(t * 1.5) * 0.22;
+
+                if (Math.random() < 0.009) spawnShootingStar();
+                for (let i = shootingStars.length - 1; i >= 0; i--) {
+                    const s = shootingStars[i];
+                    s.mesh.position.add(s.velocity);
+                    s.life -= 0.014;
+                    s.mesh.children.forEach(ch => { if (ch.material) ch.material.opacity = Math.max(0, s.life); });
+                    if (s.life <= 0) {
+                        scene.remove(s.mesh);
+                        shootingStars.splice(i, 1);
+                    }
+                }
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        const themes = [
+            { symbols: ['💙', '🩵', '💎', '✨'], topDeco: '💙 ✨ 🩵' },
+            { symbols: ['🌸', '🌺', '🌷', '💐', '🦋'], topDeco: '🦋 🌸 🦋' },
+            { symbols: ['✨', '⭐', '🌟', '💫', '🌠'], topDeco: '✨ 🌠 ✨' },
+            { symbols: ['💙', '🌸', '✨', '🩵', '🦋'], topDeco: '🩵 🌸 💙' }
+        ];
+        let themeIndex = 0;
+
+        function createTouchMagic(x, y) {
+            playLovelyTapSound();
+
+            const currentTheme = themes[themeIndex];
+            themeIndex = (themeIndex + 1) % themes.length;
+            spawnShootingStar();
+
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'burst-particle';
+                particle.textContent = currentTheme.symbols[Math.floor(Math.random() * currentTheme.symbols.length)];
+                const angle = (Math.PI * 2 * i) / 15 + (Math.random() - 0.5) * 0.4;
+                const dist = 80 + Math.random() * 135;
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                particle.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+                particle.style.setProperty('--ty', `${Math.sin(angle) * dist - 35}px`);
+                particle.style.setProperty('--rot', `${(Math.random() - 0.5) * 160}deg`);
+                particle.style.setProperty('--dur', `${2.5 + Math.random() * 1.1}s`);
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 3600);
+            }
+
+            const safeX = Math.max(200, Math.min(window.innerWidth - 200, x));
+            const safeY = Math.max(130, Math.min(window.innerHeight - 140, y));
+
+            const card = document.createElement('div');
+            card.className = 'floating-star-card';
+            card.style.left = `${safeX}px`;
+            card.style.top = `${safeY}px`;
+
+            const deco = document.createElement('span');
+            deco.className = 'deco-top';
+            deco.textContent = currentTheme.topDeco;
+
+            const text = document.createElement('div');
+            text.className = 'msg-text';
+            text.textContent = `"${getNextUniqueMessage()}"`;
+
+            const footer = document.createElement('span');
+            footer.className = 'deco-bottom';
+            footer.textContent = 'Siempre contigo, Marianela';
+
+            card.appendChild(deco);
+            card.appendChild(text);
+            card.appendChild(footer);
+            document.body.appendChild(card);
+            setTimeout(() => card.remove(), 7000);
+        }
+
+        musicBtn.addEventListener('click', () => resolveAndPlayAudio(false));
+        document.getElementById('shooting-star-btn').addEventListener('click', () => {
+            playLovelyTapSound();
+            spawnShootingStar();
+            quoteEl.classList.remove('visible');
+            setTimeout(() => {
+                quoteEl.textContent = `"${getNextUniqueMessage()}"`;
+                quoteEl.classList.add('visible');
+            }, 500);
+        });
+
+        setInterval(() => {
+            quoteEl.classList.remove('visible');
+            setTimeout(() => {
+                quoteEl.textContent = `"${getNextUniqueMessage()}"`;
+                quoteEl.classList.add('visible');
+            }, 600);
+        }, 9000);
+
+        let pointerDownPos = { x: 0, y: 0 };
+        container.addEventListener('pointerdown', (e) => {
+            pointerDownPos = { x: e.clientX, y: e.clientY };
+        });
+        container.addEventListener('pointerup', (e) => {
+            if (Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y) < 10) {
+                createTouchMagic(e.clientX, e.clientY);
+            }
+        });
+    </script>
+</body>
+</html>
